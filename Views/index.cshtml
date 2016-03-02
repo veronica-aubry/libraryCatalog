@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Night Vale Community Library</title>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='Content/css/styles.css'>
+  </head>
+  <body>
+    <div class="jumbotron text-center">
+      <h1><a href="/">Night Vale Community Library</a></h1>
+
+      <form class="container" action="/author_search" method="post">
+             <div class="col-md-6 col-md-offset-3">
+            	<div class="input-group input-group-lg">
+                <input type="text" class="form-control" placeholder="Search by author" name="author-name">
+              </div>
+            </div>
+      </form>
+
+      <form class="container" action="/title_search" method="post">
+             <div class="col-md-6 col-md-offset-3">
+              <div class="input-group input-group-lg">
+                <input type="text" class="form-control" placeholder="Search by title" name="book-name">
+              </div>
+            </div>
+      </form>
+    </div>
+
+
+    <div class="container text-center">
+
+      @if(@Model["authors"].Count != 0) {
+        @foreach (var author in @Model["authors"]) {
+            <p>@author.GetName():
+              @foreach (var book in @author.GetBooks()) {
+                @book.GetTitle()
+              }
+            </p>
+          }
+        }
+
+
+      <h1>Add a Book</h1>
+      <form action="/book/new" method="post">
+        Title:
+        <input name="book-title" type="text">
+        Author:
+        <input name="book-author" type="text">
+        <button type="submit">Add Book</button>
+      </form>
+    </div>
+
+
+
+  </body>
+</html>

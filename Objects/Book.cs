@@ -144,6 +144,41 @@ namespace Library
       return foundBook;
     }
 
+    public static Book FindTitle(string title)
+    {
+      SqlConnection conn = DB.Connection();
+      SqlDataReader rdr = null;
+      conn.Open();
+
+      SqlCommand cmd = new SqlCommand("SELECT * FROM books WHERE title = @BookTitle;", conn);
+      SqlParameter bookTitleParameter = new SqlParameter();
+      bookTitleParameter.ParameterName = "@BookTitle";
+      bookTitleParameter.Value = title;
+      cmd.Parameters.Add(bookTitleParameter);
+      rdr = cmd.ExecuteReader();
+
+      int foundBookId = 0;
+      string foundBookTitle = null;
+
+      while(rdr.Read())
+      {
+        foundBookId = rdr.GetInt32(0);
+        foundBookTitle = rdr.GetString(1);
+      }
+      Book foundBook = new Book(foundBookTitle, foundBookId);
+
+      if (rdr != null)
+      {
+        rdr.Close();
+      }
+      if (conn != null)
+      {
+        conn.Close();
+      }
+      return foundBook;
+    }
+
+
 
       public void Delete()
     {

@@ -142,6 +142,41 @@ namespace Library
       return foundAuthor;
     }
 
+    public static Author FindName(string name)
+    {
+      SqlConnection conn = DB.Connection();
+      SqlDataReader rdr = null;
+      conn.Open();
+
+      SqlCommand cmd = new SqlCommand("SELECT * FROM authors WHERE name = @AuthorName", conn);
+      SqlParameter authorNameParameter = new SqlParameter();
+      authorNameParameter.ParameterName = "@AuthorName";
+      authorNameParameter.Value = name;
+      cmd.Parameters.Add(authorNameParameter);
+      rdr = cmd.ExecuteReader();
+
+      int foundAuthorId = 0;
+      string foundAuthorName = null;
+
+      while(rdr.Read())
+      {
+        foundAuthorId = rdr.GetInt32(0);
+        foundAuthorName = rdr.GetString(1);
+      }
+      Author foundAuthor = new Author(foundAuthorName, foundAuthorId);
+
+      if (rdr != null)
+      {
+        rdr.Close();
+      }
+      if (conn != null)
+      {
+        conn.Close();
+      }
+      return foundAuthor;
+    }
+
+
     public void AddBook(Book newBook)
    {
      SqlConnection conn = DB.Connection();

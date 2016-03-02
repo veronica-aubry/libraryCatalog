@@ -1,0 +1,7 @@
+
+@if (@Model["author"].GetName() != null) {
+    <p>@Model["author"].GetName()</p>
+    @foreach (var book in @Model["authorBooks"]) {
+      <p>@book.GetTitle()</p>
+    }
+}
