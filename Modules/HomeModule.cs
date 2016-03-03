@@ -38,18 +38,11 @@ namespace Library
 
       Post["/book/new"] = _ => {
         Book newBook = new Book(Request.Form["book-title"]);
-          newBook.Save();
+        newBook.Save();
 
         Author newAuthor = new Author(Request.Form["book-author"]);
-
-        if (Author.FindName(newAuthor.GetName()) == null) {
           newAuthor.Save();
           newBook.AddAuthor(newAuthor);
-        } else {
-          Author existingAuthor = Author.FindName(newAuthor.GetName());
-          existingAuthor.AddBook(newBook);
-        }
-
 
 
         Dictionary<string, object> model = new Dictionary<string, object>();
@@ -60,6 +53,58 @@ namespace Library
 
         return View["index.cshtml", model];
       };
+
+      Get["/books/{id}/"] = parameters => {
+      Dictionary<string, object> model = new Dictionary<string, object>();
+      Book SelectedBook = Book.Find(parameters.id);
+      List<Author> allAuthors = SelectedBook.GetAuthors();
+      List<Copy> allCopies = SelectedBook.GetCopies();
+      model.Add("book", SelectedBook);
+      model.Add("copies", allCopies);
+      model.Add("authors", allAuthors);
+      return View["book.cshtml", model];
+      };
+
+      Post["/books/{id}/newCopy"] = parameters => {
+        Dictionary<string, object> model = new Dictionary<string, object>();
+        Book SelectedBook = Book.Find(parameters.id);
+        Copy newCopy = new Copy(parameters.id);
+        newCopy.Save();
+        List<Author> allAuthors = SelectedBook.GetAuthors();
+        List<Copy> allCopies = SelectedBook.GetCopies();
+        model.Add("book", SelectedBook);
+        model.Add("copies", allCopies);
+        model.Add("authors", allAuthors);
+        return View["book.cshtml", model];
+        };
+
+      Post["/books/{id}/newCheckout"] = parameters => {
+        Dictionary<string, object> model = new Dictionary<string, object>();
+        Book SelectedBook = Book.Find(parameters.id);
+        Patron newPatron = new Patron(Request.Form["patron-name"]);
+        newPatron.Save();
+        Copy selectedCopy = Copy.Find(Request.Form["copy-id"]);
+        newPatron.AddCopy(selectedCopy);
+        List<Author> allAuthors = SelectedBook.GetAuthors();
+        List<Copy> allCopies = SelectedBook.GetCopies();
+        model.Add("book", SelectedBook);
+        model.Add("copies", allCopies);
+        model.Add("authors", allAuthors);
+        return View["book.cshtml", model];
+        };
+
+        Get["/wipe"] = _ => {
+        Book.DeleteAll();
+        Author.DeleteAll();
+        Copy.DeleteAll();
+        Dictionary<string, object> model = new Dictionary<string, object>();
+        List<Author> allAuthors = Author.GetAll();
+        List<Book> allBooks = Book.GetAll();
+        model.Add("authors", allAuthors);
+        model.Add("books", allBooks);
+        return View["index.cshtml", model];
+        };
+
     }
   }
 }

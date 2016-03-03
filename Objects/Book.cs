@@ -279,5 +279,92 @@ namespace Library
      }
      return authors;
    }
+
+   public static int MatchBooktoJoin(int bookId)
+    {
+      SqlConnection conn = DB.Connection();
+      SqlDataReader rdr = null;
+      conn.Open();
+
+      SqlCommand cmd = new SqlCommand("SELECT id FROM authors_books WHERE book_id = @BookId", conn);
+      SqlParameter bookParameter = new SqlParameter();
+      bookParameter.ParameterName = "@BookId";
+      bookParameter.Value = bookId.ToString();
+      cmd.Parameters.Add(bookParameter);
+      rdr = cmd.ExecuteReader();
+
+      int authorsBookId = 0;
+
+      while(rdr.Read())
+      {
+        authorsBookId = rdr.GetInt32(0);
+      }
+
+      if (rdr != null)
+      {
+        rdr.Close();
+      }
+      if (conn != null)
+      {
+        conn.Close();
+      }
+      return authorsBookId;
+    }
+
+   public List<Copy> GetCopies()
+  {
+    SqlConnection conn = DB.Connection();
+    SqlDataReader rdr = null;
+    conn.Open();
+
+    SqlCommand cmd = new SqlCommand("SELECT id FROM copies WHERE authors_books_id = @AuthorsBooksId;", conn);
+    SqlParameter authorsBooksIdParameter = new SqlParameter();
+    authorsBooksIdParameter.ParameterName = "@AuthorsBooksId";
+    authorsBooksIdParameter.Value = this.GetId();
+    cmd.Parameters.Add(authorsBooksIdParameter);
+
+    rdr = cmd.ExecuteReader();
+
+    List<int> copyIds = new List<int> {};
+    while(rdr.Read())
+    {
+      int copyId = rdr.GetInt32(0);
+      copyIds.Add(copyId);
+    }
+    if (rdr != null)
+    {
+      rdr.Close();
+    }
+
+    List<Copy> copies = new List<Copy> {};
+    foreach (int copyId in copyIds)
+    {
+      SqlDataReader queryReader = null;
+      SqlCommand copyQuery = new SqlCommand("SELECT * FROM copies WHERE id = @CopyId;", conn);
+
+      SqlParameter copyIdParameter = new SqlParameter();
+      copyIdParameter.ParameterName = "@CopyId";
+      copyIdParameter.Value = copyId;
+      copyQuery.Parameters.Add(copyIdParameter);
+
+      queryReader = copyQuery.ExecuteReader();
+      while(queryReader.Read())
+      {
+            int thisCopyId = queryReader.GetInt32(0);
+            int copyAuthorsBooksId= queryReader.GetInt32(1);
+            Copy foundCopy = new Copy(copyAuthorsBooksId, thisCopyId);
+            copies.Add(foundCopy);
+      }
+      if (queryReader != null)
+      {
+        queryReader.Close();
+      }
+    }
+    if (conn != null)
+    {
+      conn.Close();
+    }
+    return copies;
+  }
   }
 }

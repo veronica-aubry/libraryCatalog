@@ -1,1 +1,50 @@
 
+
+
+<h3>@Model["book"].GetTitle()</h3>
+  @foreach (var author in Model["authors"])
+    {
+      <p>author</p>
+    }
+<p>@Model["copies"].Count</p>
+
+<ul>
+@foreach (var copy in @Model["copies"])
+  {
+    <li>@copy.GetId()</li>
+      <ul>
+
+        @foreach (var patron in @copy.GetPatrons())
+        {
+
+        <li>
+          @patron.GetName()
+        </li>
+
+        }
+      </ul>
+  }
+</ul>
+
+  <h1>Add a Copy</h1>
+  <form action='/books/@Model["book"].GetId()/newCopy' method="post">
+    <button type="submit">Add Copy of this book</button>
+  </form>
+
+  <h1>Record a Checkout</h1>
+
+  <form action='/books/@Model["book"].GetId()/newCheckout' method="post">
+    Patron Name:
+    <input type="text" name="patron-name">
+    <input id='book-id' name='book-id' type='hidden' value='@Model["book"].GetId()'>
+    <label for='copy-id'>Select a copy</label>
+    <select id='copy-id' name='copy-id' type='text'>
+      @foreach (var copy in @Model["copies"])
+      {
+        <option value='@copy.GetId()'>@copy.GetId()</option>
+      }
+    </select>
+    <button type="submit">Record Checkout</button>
+  </form>
+
+</div>

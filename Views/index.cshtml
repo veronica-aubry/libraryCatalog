@@ -33,11 +33,21 @@
         @foreach (var author in @Model["authors"]) {
             <p>@author.GetName():
               @foreach (var book in @author.GetBooks()) {
-                @book.GetTitle()
+                <a href="/books/@book.GetId()">@book.GetTitle()</a>
               }
             </p>
           }
         }
+
+        @if(@Model["books"].Count != 0) {
+          @foreach (var book in @Model["books"]) {
+              <p>@book.GetTitle()</p>
+                @foreach (var author in @book.GetAuthors()) {
+                  <a href="/books/@book.GetId()">@author.GetName()</a>
+                }
+              </p>
+            }
+          }
 
 
       <h1>Add a Book</h1>
@@ -50,7 +60,7 @@
       </form>
     </div>
 
-
+    <a href="/wipe">DELETE ALL</a>
 
   </body>
 </html>
