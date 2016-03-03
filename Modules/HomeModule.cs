@@ -39,10 +39,11 @@ namespace Library
       Post["/book/new"] = _ => {
         Book newBook = new Book(Request.Form["book-title"]);
         newBook.Save();
-
+        Copy newCopy = new Copy(newBook.GetId());
+        newCopy.Save();
         Author newAuthor = new Author(Request.Form["book-author"]);
-          newAuthor.Save();
-          newBook.AddAuthor(newAuthor);
+        newAuthor.Save();
+        newBook.AddAuthor(newAuthor);
 
 
         Dictionary<string, object> model = new Dictionary<string, object>();

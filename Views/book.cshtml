@@ -6,24 +6,27 @@
     {
       <p>author</p>
     }
-<p>@Model["copies"].Count</p>
+<p>Numbers of copies: @Model["copies"].Count</p>
 
 <ul>
-@foreach (var copy in @Model["copies"])
+@for (int i = 1; i <= (@Model["copies"].Count) ; i++)
   {
-    <li>@copy.GetId()</li>
+    <li>Copy ID: @i </li>
       <ul>
 
-        @foreach (var patron in @copy.GetPatrons())
-        {
+      @{
 
-        <li>
-          @patron.GetName()
-        </li>
+      var copyPatronLength = @Model["copies"][i-1].GetPatrons().Count;
 
-        }
+      }
+
+      @if (copyPatronLength > 0)
+      {
+        @Model["copies"][i-1].GetPatrons()[copyPatronLength - 1].GetName()
+      }
       </ul>
-  }
+    }
+
 </ul>
 
   <h1>Add a Copy</h1>
