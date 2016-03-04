@@ -66,6 +66,19 @@ namespace Library
       return View["book.cshtml", model];
       };
 
+      Patch["/books/{id}/return/{patron_id}/{copy_id}"] = parameters => {
+      Dictionary<string, object> model = new Dictionary<string, object>();
+      Book SelectedBook = Book.Find(parameters.id);
+      Checkout SelectedCheckout = Checkout.Find(parameters.patron_id, parameters.copy_id);
+      SelectedCheckout.Returned();
+      List<Author> allAuthors = SelectedBook.GetAuthors();
+      List<Copy> allCopies = SelectedBook.GetCopies();
+      model.Add("book", SelectedBook);
+      model.Add("copies", allCopies);
+      model.Add("authors", allAuthors);
+      return View["book.cshtml", model];
+      };
+
       Post["/books/{id}/newCopy"] = parameters => {
         Dictionary<string, object> model = new Dictionary<string, object>();
         Book SelectedBook = Book.Find(parameters.id);
@@ -85,7 +98,8 @@ namespace Library
         Patron newPatron = new Patron(Request.Form["patron-name"]);
         newPatron.Save();
         Copy selectedCopy = Copy.Find(Request.Form["copy-id"]);
-        newPatron.AddCopy(selectedCopy);
+        Checkout newCheckout = new Checkout(selectedCopy.GetId(), newPatron.GetId(), Request.Form["duedate"]);
+        newCheckout.Save();
         List<Author> allAuthors = SelectedBook.GetAuthors();
         List<Copy> allCopies = SelectedBook.GetCopies();
         model.Add("book", SelectedBook);

@@ -1,5 +1,13 @@
 
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='~/Content/css/styles.css'>
+  </head>
 
+<body>
+<div class="container">
 
 <h3>@Model["book"].GetTitle()</h3>
   @foreach (var author in Model["authors"])
@@ -16,13 +24,49 @@
 
       @{
 
+      var copyCheckoutLength = @Model["copies"][i-1].GetCheckouts().Count;
+
+      }
+
+      @{
+
+      var copyId = @Model["copies"][i-1].GetId();
+
+      }
+
+      @{
+
       var copyPatronLength = @Model["copies"][i-1].GetPatrons().Count;
 
       }
 
-      @if (copyPatronLength > 0)
+      @{
+
+      var route = @Model['book'].GetId()
+
+      }
+
+      @if (copyCheckoutLength > 0)
       {
-        @Model["copies"][i-1].GetPatrons()[copyPatronLength - 1].GetName()
+        @if (@Model["copies"][i-1].GetCheckouts()[copyCheckoutLength - 1].GetReturned() > 0) {
+         <div class="returned">
+         <p>Patron: @Model["copies"][i-1].GetPatrons()[copyPatronLength - 1].GetName()</p>
+         <p>Due Date: @Model["copies"][i-1].GetCheckouts()[copyCheckoutLength - 1].GetDueDate()</p>
+         <p>Returned</p>
+         </div>
+         <br>
+        } else {
+        <div class="checked-out">
+        <p>Patron: @Model["copies"][i-1].GetPatrons()[copyPatronLength - 1].GetName()</p>
+        <p>Due Date: @Model["copies"][i-1].GetCheckouts()[copyCheckoutLength - 1].GetDueDate()</p>
+        <p>Checked Out</p>
+        <form action="/books/@route/return/@Model['copies'][i-1].GetPatrons()[copyPatronLength - 1].GetName()" method="post">
+        <input type="hidden" name="_method" value="PATCH">
+        <input name="return" type="hidden" value="@copyId">
+        <button type="submit">Item returned</button>
+        </div>
+        <br>
+        }
       }
       </ul>
     }
@@ -42,12 +86,16 @@
     <input id='book-id' name='book-id' type='hidden' value='@Model["book"].GetId()'>
     <label for='copy-id'>Select a copy</label>
     <select id='copy-id' name='copy-id' type='text'>
-      @foreach (var copy in @Model["copies"])
-      {
-        <option value='@copy.GetId()'>@copy.GetId()</option>
+      @for (int i = 1; i <= (@Model["copies"].Count) ; i++){
+          <option value='@Model["copies"][i-1].GetId()'>@i</option>
       }
+
     </select>
+    <label for='duedate'>Due Date:</label>
+    <input type="date" name="duedate">
     <button type="submit">Record Checkout</button>
   </form>
-
 </div>
+
+</body>
+</html>

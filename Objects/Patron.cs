@@ -177,12 +177,12 @@ namespace Library
     }
 
 
-    public void AddCopy(Copy newCopy)
+    public void AddCopy(Copy newCopy, DateTime dueDate)
    {
      SqlConnection conn = DB.Connection();
      conn.Open();
 
-     SqlCommand cmd = new SqlCommand("INSERT INTO checkouts (copy_id, patron_id) VALUES (@CopyId, @PatronId);", conn);
+     SqlCommand cmd = new SqlCommand("INSERT INTO checkouts (copy_id, patron_id, duedate, returned) VALUES (@CopyId, @PatronId, @DueDate, @Returned);", conn);
 
      SqlParameter copyIdParameter = new SqlParameter();
      copyIdParameter.ParameterName = "@CopyId";
@@ -193,6 +193,16 @@ namespace Library
      patronIdParameter.ParameterName = "@PatronId";
      patronIdParameter.Value = this.GetId();
      cmd.Parameters.Add(patronIdParameter);
+
+     SqlParameter duedateParameter = new SqlParameter();
+     duedateParameter.ParameterName = "@DueDate";
+     duedateParameter.Value = dueDate;
+     cmd.Parameters.Add(duedateParameter);
+
+     SqlParameter returnedParameter = new SqlParameter();
+     returnedParameter.ParameterName = "@Returned";
+     returnedParameter.Value = 0;
+     cmd.Parameters.Add(returnedParameter);
 
      cmd.ExecuteNonQuery();
 

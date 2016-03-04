@@ -43,6 +43,38 @@ namespace Library
     {
       _authors_books_id = newAuthorsBooksId;
     }
+    //
+    // public int GetDueDate() {
+    //   SqlConnection conn = DB.Connection();
+    //   SqlDataReader rdr = null;
+    //   conn.Open();
+    //
+    //   SqlCommand cmd = new SqlCommand("SELECT duedate FROM checkout WHERE id = @CopyId;", conn);
+    //   SqlParameter CopyIdParameter = new SqlParameter();
+    //   CopyIdParameter.ParameterName = "@CopyId";
+    //   CopyIdParameter.Value = this.id.ToString();
+    //   cmd.Parameters.Add(CopyIdParameter);
+    //   rdr = cmd.ExecuteReader();
+    //
+    //   DateTime foundDateTime = new DateTime (2016-02-23);
+    //
+    //   while(rdr.Read())
+    //   {
+    //     DateTime foundDateTime = rdr.GetDateTime(2);
+    //   }
+    //
+    //   if (rdr != null)
+    //   {
+    //     rdr.Close();
+    //   }
+    //   if (conn != null)
+    //   {
+    //     conn.Close();
+    //   }
+    //   return foundDateTime;
+    // }
+
+
     public static List<Copy> GetAll()
     {
       List<Copy> allcopies = new List<Copy>{};
@@ -224,13 +256,14 @@ namespace Library
       }
     }
 
-    public List<Patron> GetPatrons()
+    public List<Checkout> GetCheckouts()
    {
      SqlConnection conn = DB.Connection();
      SqlDataReader rdr = null;
      conn.Open();
 
-     SqlCommand cmd = new SqlCommand("SELECT patron_id FROM checkouts WHERE copy_id = @CopyId;", conn);
+     SqlCommand cmd = new SqlCommand("SELECT id FROM checkouts WHERE copy_id = @CopyId;", conn);
+
      SqlParameter CopyIdParameter = new SqlParameter();
      CopyIdParameter.ParameterName = "@CopyId";
      CopyIdParameter.Value = this.GetId();
@@ -238,35 +271,41 @@ namespace Library
 
      rdr = cmd.ExecuteReader();
 
-     List<int> patronIds = new List<int> {};
+     List<int> checkoutIds = new List<int> {};
+
      while(rdr.Read())
      {
-       int patronId = rdr.GetInt32(0);
-       patronIds.Add(patronId);
+       int checkoutId = rdr.GetInt32(0);
+       checkoutIds.Add(checkoutId);
      }
      if (rdr != null)
      {
        rdr.Close();
      }
 
-     List<Patron> patrons = new List<Patron> {};
-     foreach (int patronId in patronIds)
+     List<Checkout> checkouts = new List<Checkout> {};
+     foreach (int checkoutId in checkoutIds)
      {
        SqlDataReader queryReader = null;
-       SqlCommand patronQuery = new SqlCommand("SELECT * FROM patrons WHERE id = @PatronId;", conn);
+       SqlCommand checkoutIdQuery = new SqlCommand("SELECT * FROM checkouts WHERE id = @CheckoutId;", conn);
 
-       SqlParameter patronIdParameter = new SqlParameter();
-       patronIdParameter.ParameterName = "@PatronId";
-       patronIdParameter.Value = patronId;
-       patronQuery.Parameters.Add(patronIdParameter);
+       SqlParameter checkoutIdParameter = new SqlParameter();
+       checkoutIdParameter.ParameterName = "@CheckoutId";
+       checkoutIdParameter.Value = checkoutId;
+       checkoutIdQuery.Parameters.Add(checkoutIdParameter);
 
-       queryReader = patronQuery.ExecuteReader();
+       queryReader = checkoutIdQuery.ExecuteReader();
        while(queryReader.Read())
        {
-             int thisPatronId = queryReader.GetInt32(0);
-             string patronName= queryReader.GetString(1);
-             Patron foundPatron = new Patron(patronName, thisPatronId);
-             patrons.Add(foundPatron);
+             int foundcheckoutId = queryReader.GetInt32(0);
+             int checkoutCopyId = queryReader.GetInt32(1);
+             int checkoutPatronId = queryReader.GetInt32(2);
+             DateTime checkoutDueDate = queryReader.GetDateTime(3);
+             int checkoutReturn = queryReader.GetInt32(4);
+
+             Checkout foundCheckout = new Checkout(checkoutCopyId, checkoutPatronId, checkoutDueDate, checkoutReturn, foundcheckoutId);
+
+             checkouts.Add(foundCheckout);
        }
        if (queryReader != null)
        {
@@ -277,7 +316,63 @@ namespace Library
      {
        conn.Close();
      }
-     return patrons;
+     return checkouts;
    }
+
+   public List<Patron> GetPatrons()
+  {
+    SqlConnection conn = DB.Connection();
+    SqlDataReader rdr = null;
+    conn.Open();
+
+    SqlCommand cmd = new SqlCommand("SELECT patron_id FROM checkouts WHERE copy_id = @CopyId;", conn);
+    SqlParameter CopyIdParameter = new SqlParameter();
+    CopyIdParameter.ParameterName = "@CopyId";
+    CopyIdParameter.Value = this.GetId();
+    cmd.Parameters.Add(CopyIdParameter);
+
+    rdr = cmd.ExecuteReader();
+
+    List<int> patronIds = new List<int> {};
+    while(rdr.Read())
+    {
+      int patronId = rdr.GetInt32(0);
+      patronIds.Add(patronId);
+    }
+    if (rdr != null)
+    {
+      rdr.Close();
+    }
+
+    List<Patron> patrons = new List<Patron> {};
+    foreach (int patronId in patronIds)
+    {
+      SqlDataReader queryReader = null;
+      SqlCommand patronQuery = new SqlCommand("SELECT * FROM patrons WHERE id = @PatronId;", conn);
+
+      SqlParameter patronIdParameter = new SqlParameter();
+      patronIdParameter.ParameterName = "@PatronId";
+      patronIdParameter.Value = patronId;
+      patronQuery.Parameters.Add(patronIdParameter);
+
+      queryReader = patronQuery.ExecuteReader();
+      while(queryReader.Read())
+      {
+            int thisPatronId = queryReader.GetInt32(0);
+            string patronName= queryReader.GetString(1);
+            Patron foundPatron = new Patron(patronName, thisPatronId);
+            patrons.Add(foundPatron);
+      }
+      if (queryReader != null)
+      {
+        queryReader.Close();
+      }
+    }
+    if (conn != null)
+    {
+      conn.Close();
+    }
+    return patrons;
+  }
   }
 }
